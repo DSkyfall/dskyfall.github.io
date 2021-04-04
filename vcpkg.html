@@ -1,0 +1,11 @@
+<link rel="stylesheet" href="/style.css">
+<a href="index.html">Back</a><br>
+<pre>
+git clone https://github.com/microsoft/vcpkg
+bootstrap-vcpkg.bat
+<a href="https://levelup.gitconnected.com/how-to-statically-link-c-libraries-with-vcpkg-visual-studio-2019-435c2d4ace03">Static linking</a>
+
+vcpkg install spdlog:x64-windows-static
+under <PropertyGroup Label="Globals"> in vcxproj file
+<VcpkgTriplet Condition="'$(Platform)'=='x64'">x64-windows-static</VcpkgTriplet>
+</pre>
