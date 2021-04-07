@@ -9,4 +9,19 @@ git clone username@host:/path/to/repository
 git add *
 git commit -m "Commit message"
 git push origin main
+
+git fetch
+git merge
+
+git pull = git fetch + git merge
+
+git config --global user.name "YOUR_USERNAME" 
+git config --global user.email "im_satoshi@musk.com"
+git config --global --list # To check the info you just provided
+
+git clone --bare my_project my_project.git
+copy to server and then on server:
+git init --bare --shared 
+
+git clone user@git.example.com:/srv/git/my_project.git
 </pre>
