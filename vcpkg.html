@@ -5,7 +5,30 @@ git clone https://github.com/microsoft/vcpkg
 bootstrap-vcpkg.bat
 <a href="https://levelup.gitconnected.com/how-to-statically-link-c-libraries-with-vcpkg-visual-studio-2019-435c2d4ace03">Static linking</a>
 
+vcpkg integration
 vcpkg install spdlog:x64-windows-static
 under <PropertyGroup Label="Globals"> in vcxproj file
 <VcpkgTriplet Condition="'$(Platform)'=='x64'">x64-windows-static</VcpkgTriplet>
+
+CMake projects should use: -DCMAKE_TOOLCHAIN_FILE=G:/dev/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows-static
+
+vcpkg install stb:x64-windows-static
+vcpkg install sdl2:x64-windows-static
+vcpkg install glew:x64-windows-static
+vcpkg install imgui[opengl3-glew-binding|sdl2-binding]:x64-windows-static
+vcpkg install websocketpp:x64-windows-static
+vcpkg install opencv4[ffmpeg]:x64-windows-static
+
+find_path(STB_INCLUDE_DIRS "stb.h")
+target_include_directories(main PRIVATE ${STB_INCLUDE_DIRS})
+find_package(GLEW REQUIRED)
+target_link_libraries(main PRIVATE GLEW::GLEW)
+find_package(SDL2 CONFIG REQUIRED)
+target_link_libraries(main PRIVATE SDL2::SDL2main SDL2::SDL2-static)
+find_package(imgui CONFIG REQUIRED)
+target_link_libraries(main PRIVATE imgui::imgui)
+find_package(websocketpp CONFIG REQUIRED)
+target_link_libraries(main PRIVATE websocketpp::websocketpp)
+find_package(OpenCV CONFIG REQUIRED)
+target_link_libraries(main PRIVATE opencv_ml opencv_dnn opencv_core opencv_flann)
 </pre>
