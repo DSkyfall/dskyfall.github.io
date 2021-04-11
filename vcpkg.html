@@ -18,6 +18,7 @@ vcpkg install glew:x64-windows-static
 vcpkg install imgui[opengl3-glew-binding|sdl2-binding]:x64-windows-static
 vcpkg install websocketpp:x64-windows-static
 vcpkg install opencv4[ffmpeg]:x64-windows-static
+vcpkg install lua:x64-windows-static
 
 find_path(STB_INCLUDE_DIRS "stb.h")
 target_include_directories(main PRIVATE ${STB_INCLUDE_DIRS})
@@ -31,4 +32,8 @@ find_package(websocketpp CONFIG REQUIRED)
 target_link_libraries(main PRIVATE websocketpp::websocketpp)
 find_package(OpenCV CONFIG REQUIRED)
 target_link_libraries(main PRIVATE opencv_ml opencv_dnn opencv_core opencv_flann)
+include(FindLua)
+find_package(Lua REQUIRED)
+target_link_libraries(main PRIVATE ${LUA_LIBRARIES})
+target_include_directories(main PRIVATE ${LUA_INCLUDE_DIR})
 </pre>

@@ -1,0 +1,110 @@
+<script src="setup.js"></script>
+<script src="game.js"></script>
+<script id="shader-fs" type="x-shader/x-fragment" src="game.fs">
+precision highp float;
+varying vec2 coord;
+uniform vec2 center;
+uniform vec3 cameraPos;
+uniform vec3 cameraRight;
+uniform vec3 cameraForward;
+uniform vec3 cameraUp;
+
+uniform int sphereCount;
+uniform vec4 sphereColors[16];
+uniform vec4 spheres[16];
+
+float distWorld(vec3 pos, vec3 dir)
+{
+	return pos.y/(abs(dir.y) + 0.0001);
+}
+
+vec4 colorWorld(vec3 pos, vec3 dir)
+{
+	return vec4((fract(pos.x) < 0.5) == (fract(pos.z) < 0.5) ? 0.8 : 0.5);
+}
+
+float distSpheres(vec3 pos, vec3 dir)
+{
+	float d = 1e9;
+	for(int i=0; i<16; i++)
+	{
+		if(i >= sphereCount)
+			break;
+		d = min(d, distance(pos, spheres[i].xyz)-spheres[i].w);
+	}
+	return d;
+}
+
+vec4 colorSpheres(vec3 pos, vec3 dir)
+{
+	vec4 color;
+	float minDist = 1e9;
+	for(int i=0; i<16; i++)
+	{
+		if(i >= sphereCount)
+			break;
+	
+		float d = distance(pos, spheres[i].xyz)-spheres[i].w;
+		if(d <minDist)
+		{
+			minDist = d;
+			color = sphereColors[i];
+		}
+	}
+	return color;
+}
+
+float dist(vec3 pos, vec3 dir)
+{
+	return min(distWorld(pos,dir), distSpheres(pos,dir));
+}
+
+vec4 color(vec3 pos, vec3 dir)
+{
+	float dw = distWorld(pos,dir);
+	float ds = distSpheres(pos, dir);
+	if(dw < ds)
+		return colorWorld(pos, dir);
+	else
+		return colorSpheres(pos, dir);
+}
+
+void main(void) 
+{
+	vec3 pos = cameraPos;
+	vec3 dir = normalize(cameraForward + cameraRight*coord.x + cameraUp*coord.y);
+	
+	float l = 0.0;
+	for(int i=0; i<100; i++)
+	{
+		float d = dist(pos,dir);
+		pos += dir*d;
+		l += d;
+		if (l > 100.0 || d < 0.001)
+			break;
+	}
+	
+	if(l > 100.0)
+	{
+		gl_FragColor = vec4(dir*0.5+0.5, 1.0);
+	}
+	else
+	{	
+		gl_FragColor = color(pos, dir);
+		gl_FragColor.w = 1.0;
+	}
+}
+</script>
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="setup.css">
+	</head>
+	<body onload="init('canvas')">
+		<canvas id="canvas" width="100%" height="100%"></canvas>
+		<div id="ui">
+			<a onclick="setupVR();">VRR</a>
+			<div class="strokeme" id="infoFrame"></div>	
+			<div class="strokeme" id="info"></div>
+		</div>
+	</body>
+</html>
