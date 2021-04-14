@@ -86,7 +86,7 @@ function onXRFrame(t, frame) {
 		for (let view of pose.views) {
 			let viewport = glLayer.getViewport(view);
 			gl.viewport(viewport.x, viewport.y,viewport.width, viewport.height);
-			draw(view.transform, view.projectionMatrix);
+			draw(view.transform.matrix, view.projectionMatrix);
 		}
 	}
 }
