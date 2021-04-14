@@ -127,7 +127,7 @@ function update()
 		ws.send(buffer);
 }
 
-function draw()
+function draw(view, projection)
 {
-	drawFullscreen(shader);
+	drawFullscreen(shader, view, projection);
 }
