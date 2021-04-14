@@ -18,7 +18,7 @@ function initXR() {
 		alert("webxr not supported");
 	}
 }
-function onRequestSession() {
+function requestVR() {
 	return navigator.xr.requestSession('immersive-vr').then((session) => {
 		session.isImmersive = true;
 		onSessionStarted(session);
