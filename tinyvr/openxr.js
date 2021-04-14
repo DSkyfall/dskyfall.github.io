@@ -57,6 +57,17 @@ function onSessionEnded(event) {
 		//xrButton.setSession(null);
 	}
 }
+function transpose(m)
+{
+	let r = new Float32Array(16);
+	for(let i =0; i<4; i++)
+	{
+		for(let j=0; j<4; j++)
+		{
+			r[i*4+j] = m[j*4+i];
+		}
+	}
+}
 function onXRFrame(t, frame) {
 	let session = frame.session;
 	let refSpace = session.isImmersive ? xrImmersiveRefSpace : xrInlineRefSpace;
@@ -86,7 +97,7 @@ function onXRFrame(t, frame) {
 		for (let view of pose.views) {
 			let viewport = glLayer.getViewport(view);
 			gl.viewport(viewport.x, viewport.y,viewport.width, viewport.height);
-			draw(view.transform.matrix, view.projectionMatrix);
+			draw(transpose(view.transform.matrix), transpose(view.projectionMatrix));
 		}
 	}
 }
