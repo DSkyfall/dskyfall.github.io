@@ -2,7 +2,7 @@
 var canvas;
 var gl;
 var time = 0.0;
-var context = {};
+var context = {"yaw":0.0, "pitch":0.0};
 var frameData;
 
 function setup(canvasid)
@@ -22,6 +22,10 @@ function setup(canvasid)
 	{
 		context.mouseX = e.clientX/canvas.width;
 		context.mouseY = e.clientY/canvas.height;
+		if (event.buttons && 2) {
+			context.yaw += event.movementX/canvas.width;
+			context.pitch += event.movementY/canvas.width;
+		}
 	}
 	
 	window.onkeydown = function(e)
@@ -96,7 +100,7 @@ function setupUpdate()
 	context.time = newTime;
 	
 	document.getElementById('infoFrame').innerHTML = '';
-	var trans = mulTransform(rotY((-context.mouseX*2.0+1.0)*Math.PI), rotX(1.0-context.mouseY*2.0));
+	var trans = mulTransform(rotY((-context.yaw*2.0+1.0)*Math.PI), rotX(1.0-context.pitch*2.0));
 	//var trans = rotZ((context.mouseX*2.0-1.0)*Math.PI);
 		
 	context.cameraForward = vec3Scale(trans.z, -1.0);
