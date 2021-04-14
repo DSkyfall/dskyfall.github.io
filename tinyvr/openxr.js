@@ -20,7 +20,7 @@ function initXR() {
 	}
 	else
 	{
-		alert("webxr not supported");
+		initWebgl();
 	}
 }
 function requestVR() {
