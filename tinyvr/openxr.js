@@ -20,6 +20,7 @@ function initXR() {
 	}
 	else
 	{
+		log("using webgl");
 		initWebgl();
 	}
 }
