@@ -108,7 +108,7 @@ function update()
 {
 	setupUpdate();
 		
-	if(context.vrGamepads && context.vrGamepads[1])
+	if(context.vrGamepads && context.vrGamepads[1] && false)
 	{
 		sphereCount = 3;
 		sphereArray = new Float32Array(12);

@@ -44,7 +44,7 @@ function onSessionStarted(session) {
 	session.updateRenderState({
 		baseLayer: glLayer
 	});
-	let refSpaceType = session.isImmersive ? 'local' : 'viewer';
+	let refSpaceType = session.isImmersive ? 'local_floor' : 'viewer';
 	session.requestReferenceSpace(refSpaceType).then((refSpace) => {
 		if (session.isImmersive) {
 			xrImmersiveRefSpace = refSpace;
