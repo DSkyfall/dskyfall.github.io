@@ -90,7 +90,6 @@ function setup(canvasid)
 			}
 		}
 	});
-}
 	
 	context.cameraPos = [0.0, 1.8, 0.0];
 	context.cameraRight = [1.0, 0.0, 0.0];
