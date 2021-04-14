@@ -53,6 +53,45 @@ function setup(canvasid)
 			context.left = false;
 	}
 	
+	let primaryTouch = undefined;
+	let prevTouchX = undefined;
+	let prevTouchY = undefined;
+	canvas.addEventListener("touchstart", (event) => {
+		if (primaryTouch == undefined) {
+			let touch = event.changedTouches[0];
+			primaryTouch = touch.identifier;
+			prevTouchX = touch.pageX;
+			prevTouchY = touch.pageY;
+		}
+	});
+	canvas.addEventListener("touchend", (event) => {
+		for (let touch of event.changedTouches) {
+			if (primaryTouch == touch.identifier) {
+				primaryTouch = undefined;
+				context.yaw += (touch.pageX - prevTouchX)/canvas.width;
+				context.pitch += (touch.pageY - prevTouchY)/canvas.height;
+			}
+		}
+	});
+	canvas.addEventListener("touchcancel", (event) => {
+		for (let touch of event.changedTouches) {
+			if (primaryTouch == touch.identifier) {
+				primaryTouch = undefined;
+			}
+		}
+	});
+	canvas.addEventListener("touchmove", (event) => {
+		for (let touch of event.changedTouches) {
+			if (primaryTouch == touch.identifier) {
+				context.yaw += (touch.pageX - prevTouchX)/canvas.width;
+				context.pitch += (touch.pageY - prevTouchY)/canvas.height;
+				prevTouchX = touch.pageX;
+				prevTouchY = touch.pageY;
+			}
+		}
+	});
+}
+	
 	context.cameraPos = [0.0, 1.8, 0.0];
 	context.cameraRight = [1.0, 0.0, 0.0];
 	context.cameraUp = [0.0, 0.0, 1.0];
