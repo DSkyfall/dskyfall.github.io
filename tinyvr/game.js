@@ -73,7 +73,7 @@ function init()
 	initXR();
 	setupWebgl();
 	shader = setupFullscreenShader('shader-fs');
-	setupWebSocket();
+	//setupWebSocket();
 	
 }
 
