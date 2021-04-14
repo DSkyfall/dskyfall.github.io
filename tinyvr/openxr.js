@@ -66,17 +66,17 @@ function onXRFrame(t, frame) {
 	let pose = frame.getViewerPose(refSpace);
 	session.requestAnimationFrame(onXRFrame);
 	
-	context.vrGamepads = []
-		// Check for and respond to any gamepad state changes.
-	for (let source of session.inputSources) {
-		if (source.gamepad) {
-			let pose = frame.getPose(source.gripSpace, refSpace);
+	// context.vrGamepads = []
+		// // Check for and respond to any gamepad state changes.
+	// for (let source of session.inputSources) {
+		// if (source.gamepad) {
+			// let pose = frame.getPose(source.gripSpace, refSpace);
 			
-			context.vrGamepads.push(source.gamepad)
-			//ProcessGamepad(source.gamepad, source.handedness, pose);
-			//pose.transform.matrix
-		}
-	}
+			// context.vrGamepads.push(source.gamepad)
+			// //ProcessGamepad(source.gamepad, source.handedness, pose);
+			// //pose.transform.matrix
+		// }
+	// }
 	
 	if (pose) {
 		let glLayer = session.renderState.baseLayer;
