@@ -72,7 +72,7 @@ function onXRFrame(t, frame) {
 		if (source.gamepad) {
 			let pose = frame.getPose(source.gripSpace, refSpace);
 			
-			context.vrGamepads.push(gamepad)
+			context.vrGamepads.push(source.gamepad)
 			//ProcessGamepad(source.gamepad, source.handedness, pose);
 			//pose.transform.matrix
 		}
