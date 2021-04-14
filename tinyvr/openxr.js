@@ -3,6 +3,11 @@ let xrImmersiveRefSpace = null;
 let xrInlineRefSpace = null;
 
 function initXR() {
+	if (!navigator.xr)
+	{
+		log("using polyfill");
+		var polyfill = new WebXRPolyfill();
+	}
 	gl = canvas.getContext('webgl', { xrCompatible: true });
 	if (navigator.xr) {
 		navigator.xr.isSessionSupported('immersive-vr').then((supported) => {
@@ -77,17 +82,18 @@ function onXRFrame(t, frame) {
 	let pose = frame.getViewerPose(refSpace);
 	session.requestAnimationFrame(onXRFrame);
 	
-	// context.vrGamepads = []
-		// // Check for and respond to any gamepad state changes.
-	// for (let source of session.inputSources) {
-		// if (source.gamepad) {
-			// let pose = frame.getPose(source.gripSpace, refSpace);
+	context.vrGamepads = []
+		// Check for and respond to any gamepad state changes.
+	for (let source of session.inputSources) {
+		if (source.gamepad) {
+			let pose = frame.getPose(source.gripSpace, refSpace);
+			source.gamepad.pose = pose;
 			
-			// context.vrGamepads.push(source.gamepad)
-			// //ProcessGamepad(source.gamepad, source.handedness, pose);
-			// //pose.transform.matrix
-		// }
-	// }
+			context.vrGamepads.push(source.gamepad)
+			//ProcessGamepad(source.gamepad, source.handedness, pose);
+			//pose.transform.matrix
+		}
+	}
 	
 	if (pose) {
 		let glLayer = session.renderState.baseLayer;
