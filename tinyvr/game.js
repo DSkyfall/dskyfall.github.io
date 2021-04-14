@@ -116,15 +116,19 @@ function update()
 		set31(sphereArray,0, context.controllers[0].position, 1.0);
 		set31(sphereArray,4, context.controllers[1].position, 1.0);
 		set31(sphereArray,8, shotPos, 1.0);
-		set4(sphereColorArray, 0, 1.0, 0.0, 0.0, 1.0);
-		set4(sphereColorArray, 4, 0.0, 1.0, 0.0, 1.0);
-		set4(sphereColorArray, 8, 0.0, 0.0, 1.0, 1.0);
+		set4(sphereColorArray, 0, 1.0, 0.0, 0.0, 0.1);
+		set4(sphereColorArray, 4, 0.0, 1.0, 0.0, 0.1);
+		set4(sphereColorArray, 8, 0.0, 0.0, 1.0, 0.1);
 		shotPos = vecAdd(shotPos, vec3Scale(shotSpeed, 0.01));
 		
 		if(context.vrGamepads[1].buttons[1].pressed)
 		{
 			shotPos = vec3Scale(context.controllers[1].position, 1.0);
 			shotSpeed = vec3Scale(context.controllers[1].linearVelocity, 1.0);
+		}
+		if(context.vrGamepads[0].buttons[1].pressed)
+		{
+			shotPos = vec3Scale(context.controllers[0].position, 1.0);
 			var o = context.vrGamepads[0].pose.orientation;
 			shotSpeed = [2.0*o[0]*o[2] + 2.0*o[3]*o[1], 2*o[1]*o[2] - 2.0*o[3]*o[0], 1 - 2.0*o[0]*o[0] - 2.0*o[1]*o[1]];
 		}
