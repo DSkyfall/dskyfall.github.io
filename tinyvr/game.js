@@ -129,7 +129,7 @@ function update()
 
 function draw(view, projection)
 {
-	logMatrix(view);
-	logMatrix(projection);
+	//logMatrix(view);
+	//logMatrix(projection);
 	drawFullscreen(shader, view, projection);
 }
