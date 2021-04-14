@@ -102,6 +102,7 @@ function onXRFrame(t, frame) {
 	if (pose) {
 		let glLayer = session.renderState.baseLayer;
 		gl.bindFramebuffer(gl.FRAMEBUFFER, glLayer.framebuffer);
+		gl.clearColor(0.8, 0.5, 0.0, 0.0);
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 		update();
 		for (let view of pose.views) {
