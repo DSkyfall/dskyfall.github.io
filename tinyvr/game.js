@@ -1,5 +1,6 @@
 var shader;
-var ws;
+var ws = null;
+var connected = false;
 var sphereCount = 0;
 var sphereArray = new ArrayBuffer(0);
 var sphereColorArray = new ArrayBuffer(0);
@@ -10,14 +11,11 @@ function setupWebSocket()
   {
     try
     {
-		 //alert("WebSocket is supported by your Browser!");
-		 // Let us open a web socket
-		 //ws = new WebSocket("ws://localhost:8001");
 		 ws = new WebSocket("ws://192.168.1.60:8001");
 		 ws.binaryType = "arraybuffer";
 		 ws.onopen = function()
 		 {
-			// Web Socket is connected, send data using send()
+			connected = true;
 			ws.send("Join");
 		 };
 		 ws.onmessage = function (event) 
@@ -47,8 +45,8 @@ function setupWebSocket()
 		 };
 		 ws.onclose = function()
 		 { 
-			// websocket is closed.
-			alert("Connection is closed..."); 
+			alert("Connection is closed...");
+			connected = false;
 		 };
 		 
 			//setInterval(Update, 30);
@@ -56,22 +54,27 @@ function setupWebSocket()
      }
      catch(exception)
      {
+		connected = false;
         alert(exception);
      }
   }
   else
   {
-     // The browser doesn't support WebSocket
-     alert("WebSocket NOT supported by your Browser!");
-  }
+		connected = false;
+		alert("WebSocket NOT supported by your Browser!");
+	}
 }
 
 function init()
 {
 	setup('canvas');
+	//initWebVR();
+	//initWebgl();
+	initXR();
+	setupWebgl();
 	shader = setupFullscreenShader('shader-fs');
 	setupWebSocket();
-	window.requestAnimationFrame(update);
+	
 }
 
 var shotPos = [0.0, 1.5, -3.0];
@@ -87,7 +90,6 @@ function pushArray(a, b)
 
 function update()
 {
-	//window.requestAnimationFrame(update);
 	setupUpdate();
 		
 	if(context.vrGamepads && context.vrGamepads[1])
@@ -105,7 +107,6 @@ function update()
 	gl.uniform1i(gl.getUniformLocation(shader, "sphereCount"), sphereCount);
 	setConstant(shader, "spheres",  new Float32Array(sphereArray));
 	setConstant(shader, "sphereColors",  new Float32Array(sphereColorArray));
-	setupDrawFullscreen(shader);
 	logF(sphereCount);
 	var floats = new Float32Array(sphereArray);
 	logF(floats.length);
@@ -122,5 +123,11 @@ function update()
         view[3] = context.mouseX;
         view[4] = context.mouseY;
 
-        ws.send(buffer);
+	if (connected)
+		ws.send(buffer);
+}
+
+function draw()
+{
+	drawFullscreen(shader);
 }
