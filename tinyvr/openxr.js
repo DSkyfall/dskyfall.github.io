@@ -92,7 +92,7 @@ function onXRFrame(t, frame) {
 			let pose = frame.getPose(source.gripSpace, refSpace);
 			//source.gamepad.pose = pose;
 			
-			context.vrGamepads.push({"buttons":source.gamepad.buttons, "axes":source.gamepad.axes, "pose":pose});
+			//context.vrGamepads.push({"buttons":source.gamepad.buttons, "axes":source.gamepad.axes, "pose":pose});
 			//ProcessGamepad(source.gamepad, source.handedness, pose);
 			//pose.transform.matrix
 		}
