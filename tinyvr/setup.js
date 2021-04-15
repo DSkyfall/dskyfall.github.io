@@ -167,10 +167,10 @@ function setupUpdate()
 
 function dump(obj)
 {
-	return dumpR(obj, 10);
+	return dumpR(obj, 10, true);
 }
 
-function dumpR(obj, level)
+function dumpR(obj, level, allowP)
 {
 	if(obj == null)
 		return "null";
@@ -183,15 +183,15 @@ function dumpR(obj, level)
 			return "*";
 	}
 	
-	var text = "";
+	let text = "";
 	if (typeof(obj) == 'object')
 	{
 		text = '{';
 		let p = Object.getPrototypeOf(obj);
-		if (p)
+		if (p && allowP)
 		{
 			//text += "<" + dump(p, level-1) + ">";
-			text += "<fgsdgsdf" + dumpR(p,level-1) + ">";
+			text += "|" + dumpR(p,level-1, false) + "|";
 			// let ps = Object.getOwnPropertyNames(p);
 			// for(let i=0; i<ps.length; i++)
 			// {
@@ -209,7 +209,7 @@ function dumpR(obj, level)
 			{
 				try
 				{
-					text += dumpR(obj[item], level-1);
+					text += dumpR(obj[item], level-1, true);
 				}
 				catch(err)
 				{
@@ -225,7 +225,7 @@ function dumpR(obj, level)
 		text = "[";
 		for(let i=0; i<obj.length; i++)
 		{
-			text += dumpR(obj[i], level-1) + ", ";
+			text += dumpR(obj[i], level-1, true) + ", ";
 		}
 		text = "]";
 	}
