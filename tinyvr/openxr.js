@@ -94,6 +94,12 @@ function onXRFrame(t, frame) {
 			let pose = frame.getPose(source.gripSpace, refSpace);
 			//source.gamepad.pose = pose;
 			
+			if(firstImmersive)
+			{
+				log(JSON.stringify(source.gamepad));
+				log(JSON.stringify(pose));
+			}
+			
 			context.vrGamepads2.push({"buttons":source.gamepad.buttons, "axes":source.gamepad.axes, "pose":pose});
 			}
 			catch(err)
@@ -118,12 +124,16 @@ function onXRFrame(t, frame) {
 			//draw(transpose(view.transform.matrix), transpose(view.projectionMatrix));
 			if(session.isImmersive && firstImmersive)
 			{
-				firstImmersive = false;
+				
 				logMatrix(view.transform.matrix);
 				logMatrix(view.projectionMatrix);
 				log(glLayer.framebuffer + ' ' + viewport.x + ' ' + viewport.y + ' ' + viewport.width + ' ' + viewport.height);
 			}
 		}
+	}
+	if(session.isImmersive)
+	{
+		firstImmersive = false;
 	}
 }
 let lookYaw = 0;
