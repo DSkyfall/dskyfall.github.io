@@ -102,6 +102,7 @@ function onXRFrame(t, frame) {
 			}
 			//ProcessGamepad(source.gamepad, source.handedness, pose);
 			//pose.transform.matrix
+			//log(dump(source.gamepad));
 		}
 	}
 	

@@ -191,7 +191,7 @@ function dumpR(obj, level)
 		if (p)
 		{
 			//text += "<" + dump(p, level-1) + ">";
-			text += "<fgsdgsdf" + dump(p,level-1) + ">";
+			text += "<fgsdgsdf" + dumpR(p,level-1) + ">";
 			// let ps = Object.getOwnPropertyNames(p);
 			// for(let i=0; i<ps.length; i++)
 			// {
@@ -209,7 +209,7 @@ function dumpR(obj, level)
 			{
 				try
 				{
-					text += dump(obj[item], level-1);
+					text += dumpR(obj[item], level-1);
 				}
 				catch(err)
 				{
@@ -225,7 +225,7 @@ function dumpR(obj, level)
 		text = "[";
 		for(let i=0; i<obj.length; i++)
 		{
-			text += dump(obj[i], level-1) + ", ";
+			text += dumpR(obj[i], level-1) + ", ";
 		}
 		text = "]";
 	}
