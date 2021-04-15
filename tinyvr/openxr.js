@@ -45,13 +45,14 @@ function onSessionStarted(session) {
 	session.updateRenderState({
 		baseLayer: glLayer
 	});
-	let refSpaceType = session.isImmersive ? 'local_floor' : 'viewer';
+	let refSpaceType = session.isImmersive ? 'local' : 'viewer';
 	session.requestReferenceSpace(refSpaceType).then((refSpace) => {
 		if (session.isImmersive) {
 			xrImmersiveRefSpace = refSpace;
 		} else {
 			xrInlineRefSpace = refSpace;
 		}
+		log("isIm " + session.isImmersive);
 		session.requestAnimationFrame(onXRFrame);
 	});
 }
@@ -76,9 +77,14 @@ function transpose(m)
 	return m;
 }
 function onXRFrame(t, frame) {
+	
 	try
 	{
 	let session = frame.session;
+	if(session.isImmersive)
+	{
+		log(pose + ' ' + session.renderState.baseLayer.framebuffer);
+	}
 	let refSpace = session.isImmersive ? xrImmersiveRefSpace : xrInlineRefSpace;
 	if (!session.isImmersive) {
 		//refSpace = getAdjustedRefSpace(refSpace);
@@ -100,7 +106,7 @@ function onXRFrame(t, frame) {
 	// }
 	if(session.isImmersive)
 	{
-		log(pose + ' ' + glLayer.framebuffer);
+		log(pose + ' ' + session.renderState.baseLayer.framebuffer);
 	}
 	
 	if (pose) {
