@@ -111,6 +111,12 @@ function onXRFrame(t, frame) {
 		}
 	}
 	
+	if(session.isImmersive && firstImmersive)
+	{
+		log(dump(context));
+		firstImmersive = false;
+	}
+	
 	if (pose) {
 		let glLayer = session.renderState.baseLayer;
 		gl.bindFramebuffer(gl.FRAMEBUFFER, glLayer.framebuffer);
@@ -132,11 +138,7 @@ function onXRFrame(t, frame) {
 		}
 	}
 	
-	if(session.isImmersive && firstImmersive)
-	{
-		log(dump(context));
-		firstImmersive = false;
-	}
+
 }
 let lookYaw = 0;
 let lookPitch = 0;
