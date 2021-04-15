@@ -6,7 +6,7 @@ function initXR() {
 	if (!navigator.xr)
 	{
 		log("using polyfill");
-		//var polyfill = new WebXRPolyfill();
+		var polyfill = new WebXRPolyfill();
 	}
 	gl = canvas.getContext('webgl', { xrCompatible: true });
 	if (navigator.xr) {
@@ -52,13 +52,11 @@ function onSessionStarted(session) {
 		} else {
 			xrInlineRefSpace = refSpace;
 		}
-		log("isIm " + session.isImmersive);
 		session.requestAnimationFrame(onXRFrame);
 	});
 }
 function onEndSession(session) {
 	session.end();
-	log('end session' + session.isImmersive);
 }
 function onSessionEnded(event) {
 	if (event.session.isImmersive) {
@@ -77,15 +75,9 @@ function transpose(m)
 	}
 	return m;
 }
+bool firstImmersive = true;
 function onXRFrame(t, frame) {
-	
-	try
-	{
 	let session = frame.session;
-	if(session.isImmersive)
-	{
-		log('fb ' + session.renderState.baseLayer.framebuffer);
-	}
 	let refSpace = session.isImmersive ? xrImmersiveRefSpace : xrInlineRefSpace;
 	if (!session.isImmersive) {
 		//refSpace = getAdjustedRefSpace(refSpace);
@@ -93,21 +85,17 @@ function onXRFrame(t, frame) {
 	let pose = frame.getViewerPose(refSpace);
 	session.requestAnimationFrame(onXRFrame);
 	
-	// context.vrGamepads = [];
-		// // Check for and respond to any gamepad state changes.
-	// for (let source of session.inputSources) {
-		// if (source.gamepad) {
-			// let pose = frame.getPose(source.gripSpace, refSpace);
-			// //source.gamepad.pose = pose;
+	context.vrGamepads = [];
+		// Check for and respond to any gamepad state changes.
+	for (let source of session.inputSources) {
+		if (source.gamepad) {
+			let pose = frame.getPose(source.gripSpace, refSpace);
+			//source.gamepad.pose = pose;
 			
-			// context.vrGamepads.push({"buttons":source.gamepad.buttons, "axes":source.gamepad.axes, "pose":pose});
-			// //ProcessGamepad(source.gamepad, source.handedness, pose);
-			// //pose.transform.matrix
-		// }
-	// }
-	if(session.isImmersive)
-	{
-		log(pose + ' ' + session.renderState.baseLayer.framebuffer);
+			context.vrGamepads.push({"buttons":source.gamepad.buttons, "axes":source.gamepad.axes, "pose":pose});
+			//ProcessGamepad(source.gamepad, source.handedness, pose);
+			//pose.transform.matrix
+		}
 	}
 	
 	if (pose) {
@@ -121,16 +109,15 @@ function onXRFrame(t, frame) {
 			gl.viewport(viewport.x, viewport.y,viewport.width, viewport.height);
 			draw(view.transform.matrix, view.projectionMatrix)
 			//draw(transpose(view.transform.matrix), transpose(view.projectionMatrix));
-			if(session.isImmersive)
+			if(session.isImmersive && firstImmersive)
 			{
+				firstImmersive = false;
 				logMatrix(view.transform.matrix);
 				logMatrix(view.projectionMatrix);
 				log(glLayer.framebuffer + ' ' + viewport.x + ' ' + viewport.y + ' ' + viewport.width + ' ' + viewport.height);
 			}
 		}
 	}
-	}
-	catch(err){ log(err.name); }
 }
 let lookYaw = 0;
 let lookPitch = 0;
