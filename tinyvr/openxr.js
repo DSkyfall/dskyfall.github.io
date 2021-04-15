@@ -73,7 +73,7 @@ function transpose(m)
 			r[i*4+j] = m[j*4+i];
 		}
 	}
-	return r;
+	return m;
 }
 function onXRFrame(t, frame) {
 	try
@@ -86,18 +86,18 @@ function onXRFrame(t, frame) {
 	let pose = frame.getViewerPose(refSpace);
 	session.requestAnimationFrame(onXRFrame);
 	
-	context.vrGamepads = [];
-		// Check for and respond to any gamepad state changes.
-	for (let source of session.inputSources) {
-		if (source.gamepad) {
-			let pose = frame.getPose(source.gripSpace, refSpace);
-			//source.gamepad.pose = pose;
+	// context.vrGamepads = [];
+		// // Check for and respond to any gamepad state changes.
+	// for (let source of session.inputSources) {
+		// if (source.gamepad) {
+			// let pose = frame.getPose(source.gripSpace, refSpace);
+			// //source.gamepad.pose = pose;
 			
-			context.vrGamepads.push({"buttons":source.gamepad.buttons, "axes":source.gamepad.axes, "pose":pose});
-			//ProcessGamepad(source.gamepad, source.handedness, pose);
-			//pose.transform.matrix
-		}
-	}
+			// context.vrGamepads.push({"buttons":source.gamepad.buttons, "axes":source.gamepad.axes, "pose":pose});
+			// //ProcessGamepad(source.gamepad, source.handedness, pose);
+			// //pose.transform.matrix
+		// }
+	// }
 	
 	if (pose) {
 		let glLayer = session.renderState.baseLayer;
@@ -108,7 +108,8 @@ function onXRFrame(t, frame) {
 		for (let view of pose.views) {
 			let viewport = glLayer.getViewport(view);
 			gl.viewport(viewport.x, viewport.y,viewport.width, viewport.height);
-			draw(transpose(view.transform.matrix), transpose(view.projectionMatrix));
+			draw(view.transform.matrix, view.projectionMatrix)
+			//draw(transpose(view.transform.matrix), transpose(view.projectionMatrix));
 		}
 	}
 	}
