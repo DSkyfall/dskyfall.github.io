@@ -85,14 +85,21 @@ function onXRFrame(t, frame) {
 	let pose = frame.getViewerPose(refSpace);
 	session.requestAnimationFrame(onXRFrame);
 	
-	context.vrGamepads = [];
+	context.vrGamepads2 = [];
 		// Check for and respond to any gamepad state changes.
 	for (let source of session.inputSources) {
 		if (source.gamepad) {
+			try
+			{
 			let pose = frame.getPose(source.gripSpace, refSpace);
 			//source.gamepad.pose = pose;
 			
-			//context.vrGamepads.push({"buttons":source.gamepad.buttons, "axes":source.gamepad.axes, "pose":pose});
+			context.vrGamepads2.push({"buttons":source.gamepad.buttons, "axes":source.gamepad.axes, "pose":pose});
+			}
+			catch(err)
+			{
+				log(err.name);
+			}
 			//ProcessGamepad(source.gamepad, source.handedness, pose);
 			//pose.transform.matrix
 		}
