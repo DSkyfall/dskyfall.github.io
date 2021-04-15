@@ -126,7 +126,7 @@ function onXRFrame(t, frame) {
 		}
 	}
 	
-	if(session.isImmersive)
+	if(session.isImmersive && firstImmersive)
 	{
 		log(dump(context));
 		log(dump(session));

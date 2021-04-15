@@ -139,13 +139,13 @@ function update()
 	gl.uniform1i(gl.getUniformLocation(shader, "sphereCount"), sphereCount);
 	setConstant(shader, "spheres",  new Float32Array(sphereArray));
 	setConstant(shader, "sphereColors",  new Float32Array(sphereColorArray));
-	logF(sphereCount);
-	var floats = new Float32Array(sphereArray);
-	logF(floats.length);
-	for(var i=0; i<floats.length; i++)
-	{
-		logF(floats[i]);
-	}
+	// logF(sphereCount);
+	// var floats = new Float32Array(sphereArray);
+	// logF(floats.length);
+	// for(var i=0; i<floats.length; i++)
+	// {
+		// logF(floats[i]);
+	// }
 	
 	var buffer = new ArrayBuffer(20);
         const view = new Float32Array(buffer);
