@@ -84,6 +84,11 @@ function onXRFrame(t, frame) {
 	}
 	let pose = frame.getViewerPose(refSpace);
 	session.requestAnimationFrame(onXRFrame);
+	
+	if(session.isImmersive && firstImmersive)
+	{
+		log(dump(session));
+	}
 		
 	context.vrGamepads = [];
 		// Check for and respond to any gamepad state changes.
@@ -130,7 +135,6 @@ function onXRFrame(t, frame) {
 	if(session.isImmersive && firstImmersive)
 	{
 		log(dump(context));
-		log(dump(session));
 		firstImmersive = false;
 	}
 }
