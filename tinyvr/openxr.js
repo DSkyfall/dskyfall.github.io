@@ -75,7 +75,7 @@ function transpose(m)
 	}
 	return m;
 }
-bool firstImmersive = true;
+var firstImmersive = true;
 function onXRFrame(t, frame) {
 	let session = frame.session;
 	let refSpace = session.isImmersive ? xrImmersiveRefSpace : xrInlineRefSpace;
