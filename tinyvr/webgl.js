@@ -130,7 +130,7 @@ function drawFullscreen(shaderProgram, viewMatrix, projectionMatrix)
 	gl.vertexAttribPointer(coord, 3, gl.FLOAT, false, 0, 0);
 	gl.enableVertexAttribArray(coord);
 	
-	if(projectionMatrix && projectionMatrix)
+	if(viewMatrix && projectionMatrix)
 	{
 		setPose(shaderProgram, viewMatrix, projectionMatrix);
 	}

@@ -85,7 +85,7 @@ function onXRFrame(t, frame) {
 	let pose = frame.getViewerPose(refSpace);
 	session.requestAnimationFrame(onXRFrame);
 	
-	context.vrGamepads2 = [];
+	context.vrGamepads = [];
 		// Check for and respond to any gamepad state changes.
 	for (let source of session.inputSources) {
 		if (source.gamepad) {
@@ -100,7 +100,7 @@ function onXRFrame(t, frame) {
 				log(JSON.stringify(pose));
 			}
 			
-			context.vrGamepads2.push({"buttons":source.gamepad.buttons, "axes":source.gamepad.axes, "pose":pose});
+			context.vrGamepads.push({"buttons":source.gamepad.buttons, "axes":source.gamepad.axes, "pose":pose});
 			}
 			catch(err)
 			{
@@ -120,8 +120,8 @@ function onXRFrame(t, frame) {
 		for (let view of pose.views) {
 			let viewport = glLayer.getViewport(view);
 			gl.viewport(viewport.x, viewport.y,viewport.width, viewport.height);
-			draw(view.transform.matrix, view.projectionMatrix)
-			//draw(transpose(view.transform.matrix), transpose(view.projectionMatrix));
+			//draw(view.transform.matrix, view.projectionMatrix)
+			draw(transpose(view.transform.matrix), transpose(view.projectionMatrix));
 			if(session.isImmersive && firstImmersive)
 			{
 				
