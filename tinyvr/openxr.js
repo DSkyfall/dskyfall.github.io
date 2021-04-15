@@ -6,7 +6,7 @@ function initXR() {
 	if (!navigator.xr)
 	{
 		log("using polyfill");
-		var polyfill = new WebXRPolyfill();
+		//var polyfill = new WebXRPolyfill();
 	}
 	gl = canvas.getContext('webgl', { xrCompatible: true });
 	if (navigator.xr) {
@@ -110,6 +110,12 @@ function onXRFrame(t, frame) {
 			gl.viewport(viewport.x, viewport.y,viewport.width, viewport.height);
 			draw(view.transform.matrix, view.projectionMatrix)
 			//draw(transpose(view.transform.matrix), transpose(view.projectionMatrix));
+			if(session.isImmersive)
+			{
+				logMatrix(view.transform.matrix);
+				logMatrix(view.projectionMatrix);
+				log(glLayer.framebuffer + ' ' + viewport.x + ' ' + viewport.y + ' ' + viewport.width + ' ' + viewport.height);
+			}
 		}
 	}
 	}
