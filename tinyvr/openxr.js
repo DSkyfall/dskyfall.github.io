@@ -76,6 +76,8 @@ function transpose(m)
 	return r;
 }
 function onXRFrame(t, frame) {
+	try
+	{
 	let session = frame.session;
 	let refSpace = session.isImmersive ? xrImmersiveRefSpace : xrInlineRefSpace;
 	if (!session.isImmersive) {
@@ -109,6 +111,8 @@ function onXRFrame(t, frame) {
 			draw(transpose(view.transform.matrix), transpose(view.projectionMatrix));
 		}
 	}
+	}
+	catch(err){ log(err.name); }
 }
 let lookYaw = 0;
 let lookPitch = 0;
