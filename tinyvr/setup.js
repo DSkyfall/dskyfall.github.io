@@ -152,6 +152,7 @@ function setupUpdate()
 	logF('x ' + pretty(trans.x));
 	logF('y ' + pretty(trans.y));
 	logF('z ' + pretty(trans.z));
+	//logF(dump(context));
 	
 	var step = context.delta*context.speed*10.0;
 	if(context.forward)
@@ -162,4 +163,79 @@ function setupUpdate()
 		context.cameraPos = vec3Add(context.cameraPos, vec3Scale(context.cameraRight, step));
 	if(context.left)
 		context.cameraPos = vec3Add(context.cameraPos, vec3Scale(context.cameraRight, -step));
+}
+
+function dump(obj)
+{
+	return dumpR(obj, 10);
+}
+
+function dumpR(obj, level)
+{
+	if(obj == null)
+		return "null";
+	
+	if(level == 0)
+	{
+		if(obj && obj.constructor && obj.constructor.name)
+			return obj.constructor.name;
+		else
+			return "*";
+	}
+	
+	var text = "";
+	if (typeof(obj) == 'object')
+	{
+		text = '{';
+		let p = Object.getPrototypeOf(obj);
+		if (p)
+		{
+			//text += "<" + dump(p, level-1) + ">";
+			text += "<fgsdgsdf" + dump(p,level-1) + ">";
+			// let ps = Object.getOwnPropertyNames(p);
+			// for(let i=0; i<ps.length; i++)
+			// {
+				// let item = ps[i];
+				// //text += item + ':' + (item != 'constructor' ? dump(obj[item], level-1) : "*") + ', ';
+				// text += item + ':' + dump(obj[item], level-1) + ', ';
+			// }
+		}
+		let ps = Object.getOwnPropertyNames(obj);
+		for(let i=0; i<ps.length; i++)
+		{
+			let item = ps[i];
+			text += item + ':';
+			if(item != 'constructor')
+			{
+				try
+				{
+					text += dump(obj[item], level-1);
+				}
+				catch(err)
+				{
+					text += "?";
+				}
+			}
+			text += ", ";
+		}
+		text += '}';
+	}
+	else if (typeof(obj) == 'array')
+	{
+		text = "[";
+		for(let i=0; i<obj.length; i++)
+		{
+			text += dump(obj[i], level-1) + ", ";
+		}
+		text = "]";
+	}
+	else if (typeof(obj) == 'function')
+	{
+		text = "$";
+	}
+	else
+	{
+		text += obj;
+	}	
+	return text;
 }
