@@ -98,6 +98,10 @@ function onXRFrame(t, frame) {
 			// //pose.transform.matrix
 		// }
 	// }
+	if(session.isImmersive)
+	{
+		log(pose + ' ' + glLayer.framebuffer);
+	}
 	
 	if (pose) {
 		let glLayer = session.renderState.baseLayer;
