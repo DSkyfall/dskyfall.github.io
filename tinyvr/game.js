@@ -134,10 +134,6 @@ function update()
 		}
 	}
 	
-	
-	
-	
-	
 
 	gl.useProgram(shader);
 	gl.uniform1i(gl.getUniformLocation(shader, "sphereCount"), sphereCount);

@@ -73,6 +73,7 @@ function transpose(m)
 			r[i*4+j] = m[j*4+i];
 		}
 	}
+	return r;
 }
 function onXRFrame(t, frame) {
 	let session = frame.session;
@@ -83,8 +84,6 @@ function onXRFrame(t, frame) {
 	let pose = frame.getViewerPose(refSpace);
 	session.requestAnimationFrame(onXRFrame);
 	
-	if(false)
-	{
 	context.vrGamepads = [];
 		// Check for and respond to any gamepad state changes.
 	for (let source of session.inputSources) {
@@ -96,7 +95,6 @@ function onXRFrame(t, frame) {
 			//ProcessGamepad(source.gamepad, source.handedness, pose);
 			//pose.transform.matrix
 		}
-	}
 	}
 	
 	if (pose) {
