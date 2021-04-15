@@ -58,6 +58,7 @@ function onSessionStarted(session) {
 }
 function onEndSession(session) {
 	session.end();
+	log('end session' + session.isImmersive);
 }
 function onSessionEnded(event) {
 	if (event.session.isImmersive) {
@@ -83,7 +84,7 @@ function onXRFrame(t, frame) {
 	let session = frame.session;
 	if(session.isImmersive)
 	{
-		log(pose + ' ' + session.renderState.baseLayer.framebuffer);
+		log('fb ' + session.renderState.baseLayer.framebuffer);
 	}
 	let refSpace = session.isImmersive ? xrImmersiveRefSpace : xrInlineRefSpace;
 	if (!session.isImmersive) {
