@@ -95,7 +95,7 @@ function onXRFrame(t, frame) {
 	for (let source of session.inputSources) {
 		if(session.isImmersive && firstImmersive)
 		{
-			lop("input");
+			log("input");
 			log(dump(source));
 			log(dump(source.gamepad));
 			log(dump(source.gripSpace));
