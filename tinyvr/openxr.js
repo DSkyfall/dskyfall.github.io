@@ -3,7 +3,7 @@ let xrImmersiveRefSpace = null;
 let xrInlineRefSpace = null;
 
 function initXR() {
-	if (!navigator.xr)
+	if (!navigator.xr||true)
 	{
 		log("using polyfill");
 		var polyfill = new WebXRPolyfill();
@@ -113,7 +113,7 @@ function onXRFrame(t, frame) {
 	
 	if(session.isImmersive && firstImmersive)
 	{
-		log(dump(context));
+		//log(dump(context));
 		firstImmersive = false;
 	}
 	
@@ -128,7 +128,7 @@ function onXRFrame(t, frame) {
 			gl.viewport(viewport.x, viewport.y,viewport.width, viewport.height);
 			//draw(view.transform.matrix, view.projectionMatrix)
 			if (session.isImmersive)
-				draw(transpose(view.transform.matrix), transpose(view.projectionMatrix));
+				draw(view.transform.matrix, view.projectionMatrix);
 			else
 				draw();
 			if(session.isImmersive && firstImmersive)
