@@ -127,7 +127,10 @@ function onXRFrame(t, frame) {
 			let viewport = glLayer.getViewport(view);
 			gl.viewport(viewport.x, viewport.y,viewport.width, viewport.height);
 			//draw(view.transform.matrix, view.projectionMatrix)
-			draw(transpose(view.transform.matrix), transpose(view.projectionMatrix));
+			if (session.isImmersive)
+				draw(transpose(view.transform.matrix), transpose(view.projectionMatrix));
+			else
+				draw();
 			if(session.isImmersive && firstImmersive)
 			{
 				

@@ -121,18 +121,18 @@ function update()
 		set4(sphereColorArray, 8, 0.0, 0.0, 1.0, 1.0);
 		shotPos = vecAdd(shotPos, vec3Scale(shotSpeed, 0.01));
 		
-		if(context.vrGamepads[1].buttons[1].pressed)
-		{
-			shotPos = vec3Scale(context.vrGamepads[1].pose.transform.position, 1.0);
-			shotSpeed = vec3Scale(context.vrGamepads[1].linearVelocity, 1.0);
-		}
-		if(context.vrGamepads[0].buttons[1].pressed)
-		{
-			shotPos = vec3Scale(context.vrGamepads[0].pose.transform.position, 1.0);
-			var o = context.vrGamepads[0].pose.transform.orientation;
-			//shotSpeed = [2.0*o[0]*o[2] + 2.0*o[3]*o[1], 2*o[1]*o[2] - 2.0*o[3]*o[0], 1 - 2.0*o[0]*o[0] - 2.0*o[1]*o[1]];
-			shotSpeed = [2.0*o.x*o.z + 2.0*o.w*o.y, 2*o.y*o.z - 2.0*o.w*o.x, 1 - 2.0*o.x*o.x - 2.0*o.y*o.y];
-		}
+		// if(context.vrGamepads[1].buttons[1].pressed)
+		// {
+			// shotPos = vec3Scale(context.vrGamepads[1].pose.transform.position, 1.0);
+			// shotSpeed = vec3Scale(context.vrGamepads[1].linearVelocity, 1.0);
+		// }
+		// if(context.vrGamepads[0].buttons[1].pressed)
+		// {
+			// shotPos = vec3Scale(context.vrGamepads[0].pose.transform.position, 1.0);
+			// var o = context.vrGamepads[0].pose.transform.orientation;
+			// //shotSpeed = [2.0*o[0]*o[2] + 2.0*o[3]*o[1], 2*o[1]*o[2] - 2.0*o[3]*o[0], 1 - 2.0*o[0]*o[0] - 2.0*o[1]*o[1]];
+			// shotSpeed = [2.0*o.x*o.z + 2.0*o.w*o.y, 2*o.y*o.z - 2.0*o.w*o.x, 1 - 2.0*o.x*o.x - 2.0*o.y*o.y];
+		// }
 	}
 	
 

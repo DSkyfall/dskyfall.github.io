@@ -138,7 +138,7 @@ function setupUpdate()
 	context.time = newTime;
 	
 	document.getElementById('infoFrame').innerHTML = '';
-	var trans = mulTransform(rotY((-context.yaw*2.0+1.0)*Math.PI), rotX(1.0-context.pitch*2.0));
+	var trans = mulTransform(rotY((-context.yaw)*2.0*Math.PI), rotX(-context.pitch*Math.PI));
 	//var trans = rotZ((context.mouseX*2.0-1.0)*Math.PI);
 		
 	context.cameraForward = vec3Scale(trans.z, -1.0);
