@@ -186,48 +186,51 @@ function dumpR(obj, level, allowP)
 	let text = "";
 	if (typeof(obj) == 'object')
 	{
-		text = '{';
-		let p = Object.getPrototypeOf(obj);
-		if (p && allowP)
+		if(Array.isArray(obj))
 		{
-			//text += "<" + dump(p, level-1) + ">";
-			text += "|" + dumpR(p,level-1, false) + "|";
-			// let ps = Object.getOwnPropertyNames(p);
-			// for(let i=0; i<ps.length; i++)
-			// {
-				// let item = ps[i];
-				// //text += item + ':' + (item != 'constructor' ? dump(obj[item], level-1) : "*") + ', ';
-				// text += item + ':' + dump(obj[item], level-1) + ', ';
-			// }
-		}
-		let ps = Object.getOwnPropertyNames(obj);
-		for(let i=0; i<ps.length; i++)
-		{
-			let item = ps[i];
-			text += item + ':';
-			if(item != 'constructor')
+			text = "[";
+			for(let i=0; i<obj.length; i++)
 			{
-				try
-				{
-					text += dumpR(obj[item], level-1, true);
-				}
-				catch(err)
-				{
-					text += "?";
-				}
+				text += dumpR(obj[i], level-1, true) + ", ";
 			}
-			text += ", ";
+			text += "]";
 		}
-		text += '}';
-	}
-	else if (typeof(obj) == 'array')
-	{
-		text = "[";
-		for(let i=0; i<obj.length; i++)
+		else
 		{
-			text += dumpR(obj[i], level-1, true) + ", ";
+			text = '{';
+			let p = Object.getPrototypeOf(obj);
+			if (p && allowP)
+			{
+				//text += "<" + dump(p, level-1) + ">";
+				text += "|" + dumpR(p,level-1, false) + "|";
+				// let ps = Object.getOwnPropertyNames(p);
+				// for(let i=0; i<ps.length; i++)
+				// {
+					// let item = ps[i];
+					// //text += item + ':' + (item != 'constructor' ? dump(obj[item], level-1) : "*") + ', ';
+					// text += item + ':' + dump(obj[item], level-1) + ', ';
+				// }
+			}
+			let ps = Object.getOwnPropertyNames(obj);
+			for(let i=0; i<ps.length; i++)
+			{
+				let item = ps[i];
+				text += item + ':';
+				if(item != 'constructor')
+				{
+					try
+					{
+						text += dumpR(obj[item], level-1, true);
+					}
+					catch(err)
+					{
+						text += "?";
+					}
+				}
+				text += ", ";
+			}
+			text += '}';
 		}
-		text = "]";
 	}
 	else if (typeof(obj) == 'function')
 	{
