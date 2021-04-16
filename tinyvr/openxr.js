@@ -87,7 +87,7 @@ function onXRFrame(t, frame) {
 	
 	if(session.isImmersive && firstImmersive)
 	{
-		log(dump(session));
+		//log(dump(session));
 	}
 		
 	context.vrGamepads = [];
@@ -95,9 +95,9 @@ function onXRFrame(t, frame) {
 	for (let source of session.inputSources) {
 		if(session.isImmersive && firstImmersive)
 		{
-			dump(source);
-			dump(source.gamepad);
-			dump(source.gripSpace);
+			log(dump(source));
+			log(dump(source.gamepad));
+			log(dump(source.gripSpace));
 		}
 		
 		
