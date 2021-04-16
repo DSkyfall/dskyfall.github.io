@@ -93,6 +93,14 @@ function onXRFrame(t, frame) {
 	context.vrGamepads = [];
 		// Check for and respond to any gamepad state changes.
 	for (let source of session.inputSources) {
+		if(session.isImmersive && firstImmersive)
+		{
+			dump(source);
+			dump(source.gamepad);
+			dump(source.gripSpace);
+		}
+		
+		
 		if (source.gamepad) {
 			try
 			{
