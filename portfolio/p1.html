@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stock Portfolio</title>
+<style>
+  :root { --bg:#f7f7f5; --card:#fff; --fg:#1a1a1a; --muted:#6b6b6b; --line:#e6e6e2; --up:#0a7d3c; --down:#c0262d; --warn:#9a6700; --btn:#efefeb;
+          --up-strong:#00873a; --down-strong:#e0001b; --up-bg:#d9f5e3; --down-bg:#fde0e2; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#141414; --card:#1d1d1d; --fg:#ececec; --muted:#9a9a9a; --line:#2c2c2c; --up:#3ec46d; --down:#ff6b6b; --warn:#e3b341; --btn:#2a2a2a;
+          --up-strong:#5dff95; --down-strong:#ff8a8a; --up-bg:#123d22; --down-bg:#4a1a1c; } }
+  :root { color-scheme: light dark; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  main { max-width:1120px; margin:0 auto; padding:32px 16px; }
+  header { display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end; justify-content:space-between; margin-bottom:20px; }
+  h1 { font-size:24px; margin:0 0 4px; }
+  .sub { color:var(--muted); font-size:13px; }
+  button { font:inherit; font-size:13px; padding:7px 14px; border-radius:8px; border:1px solid var(--line); background:var(--btn); color:var(--fg); cursor:pointer; }
+  button:disabled { opacity:.5; cursor:default; }
+  .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-bottom:20px; }
+  .kpi { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; }
+  .kpi .label { color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
+  .kpi .big { font-size:26px; font-weight:600; font-variant-numeric:tabular-nums; margin-top:4px; }
+  .kpi .small { font-size:14px; font-variant-numeric:tabular-nums; }
+  .wrap { background:var(--card); border:1px solid var(--line); border-radius:10px; overflow-x:auto; }
+  .trend { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:8px; font-size:16px; font-weight:600; font-variant-numeric:tabular-nums; }
+  .trend .tick { font-weight:400; }
+  table { width:100%; border-collapse:collapse; min-width:1180px; }
+  th, td { padding:10px 12px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
+  th { font-size:12px; color:var(--muted); font-weight:500; text-transform:uppercase; letter-spacing:.03em; white-space:nowrap; }
+  .num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .name { font-weight:500; }
+  .tick { color:var(--muted); font-size:12px; }
+  .up { color:var(--up); } .down { color:var(--down); }
+  .up .tick, .down .tick { color:inherit; opacity:.8; }
+  /* moves of 1% or more */
+  .pct { display:inline-block; padding:1px 6px; margin-right:-6px; border-radius:5px; }
+  .pct.strong { font-weight:700; }
+  .pct.strong.up { color:var(--up-strong); background:var(--up-bg); }
+  .pct.strong.down { color:var(--down-strong); background:var(--down-bg); }
+  .stale { color:var(--warn); }
+  tfoot td { font-weight:600; border-bottom:0; }
+  .note { color:var(--muted); font-size:12px; margin-top:16px; }
+  #status.err { color:var(--warn); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>Stock Portfolio</h1>
+      <div class="sub" id="session">&nbsp;</div>
+    </div>
+    <div style="text-align:right">
+      <button id="refresh">Refresh</button>
+      <div class="sub" id="status" style="margin-top:6px">&nbsp;</div>
+    </div>
+  </header>
+
+  <div class="kpis">
+    <div class="kpi"><div class="label">Total value</div><div class="big" id="totUsd">–</div><div class="small" id="totSek">–</div></div>
+    <div class="kpi"><div class="label">Daily change</div><div class="big" id="chgUsd">–</div><div class="small" id="chgSek">–</div></div>
+    <div class="kpi"><div class="label">Portfolio % change</div><div class="trend" id="trend"></div></div>
+  </div>
+
+  <div class="wrap">
+  <table>
+    <thead>
+      <tr><th>Stock</th><th class="num">Count</th><th class="num">Price</th><th class="num">Change</th><th class="num">1 min</th><th class="num">10 min</th><th class="num">1 hour</th><th class="num">24 h</th><th class="num">Value USD</th><th class="num">Value SEK</th><th class="num">Day chg USD</th><th class="num">Day chg SEK</th></tr>
+    </thead>
+    <tbody id="rows"></tbody>
+    <tfoot id="foot"></tfoot>
+  </table>
+  </div>
+  <div class="note">
+    Daily change = current price vs. previous session's close (pre-market counts toward the coming day, post-market toward the day just traded).
+    1 min / 10 min / 1 hour / 24 h = % change from the last traded price at that time before the latest quote (pre/post-market included).
+    Quotes from CNBC (backups: Webull, Yahoo), fetched by the browser every minute. Amber values could not be refreshed and show the last known quote.
+  </div>
+</main>
+
+<script>
+// ---- Edit your holdings here: [name, ticker, count, Webull ticker id (optional, looked up if missing)] ----
+const HOLDINGS = [
+  ['Alphabet Inc Class A', 'GOOGL', 29, 913257299],
+  ['NVIDIA', 'NVDA', 129, 913257561],
+  ['Amazon.com', 'AMZN', 20, 913256180],
+  ['Microsoft', 'MSFT', 12, 913323997],
+  ['Apple', 'AAPL', 15, 913256135],
+  ['Taiwan Semicond Mfg Co', 'TSM', 12, 913324459],
+  ['Micron Technology', 'MU', 5, 913324077],
+  ['SK hynix ADR', 'SKHY', 27, 951016471],
+  ['Intel', 'INTC', 41, 913257268],
+  ['Coca-Cola', 'KO', 0, 913255465],  
+  ['Broadcom', 'AVGO', 14, 913256091],  
+  ['Advanced Micro Devices', 'AMD', 20, 913254235],
+  ['Anthropic', 'ANT', 0],
+];
+const FX = 'USDSEK';
+const REFRESH_MS = 60 * 1000;
+const WINDOWS = [['1 min', 60], ['10 min', 600], ['1 hour', 3600], ['24 h', 86400]];   // % change look-backs (seconds)
+
+// Fallback snapshot (2026-11-20, pre-market) so the page is never empty.
+// p = price, ref = previous close used for daily change, close = last regular close, t = quote time (ms).
+const SNAPSHOT = {
+  INTC:{p:52.99,ref:55.72}, AAPL:{p:350.41,ref:349.21}, MSFT:{p:489.6,ref:498.3}, KO:{p:97.37,ref:96.09},
+  AVGO:{p:334.96,ref:346.65}, MU:{p:662.76,ref:690.44}, SKHY:{p:116.48,ref:119.2}, TSM:{p:337.6,ref:352.09},
+  NVDA:{p:142.1,ref:145.98}, GOOGL:{p:272.0,ref:272.66}, AMZN:{p:252.61,ref:257.37}, AMD:{p:462.79,ref:489.19},
+  [FX]:{p:10.1933,ref:10.1868},
+};
+for (const k in SNAPSHOT) Object.assign(SNAPSHOT[k], { close: SNAPSHOT[k].ref, t: 1795168470000, session: 'pre' });
+
+const store = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+const quotes = Object.assign({}, SNAPSHOT, store.get('pf2.quotes') || {});
+for (const k in quotes) quotes[k].stale = true;
+const webullIds = Object.assign({}, store.get('pf2.wbids') || {});
+for (const h of HOLDINGS) if (h[3]) webullIds[h[1]] = h[3];
+const bars = {};   // symbol -> [[barStartMs, close], ...] sorted, last ~25 h
+
+const $ = id => document.getElementById(id);
+const usd = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const sek = new Intl.NumberFormat('sv-SE', { maximumFractionDigits: 0 });
+const pctF = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const sign = v => v > 0 ? '+' : v < 0 ? '−' : '';
+const tone = v => v > 0 ? 'up' : v < 0 ? 'down' : '';
+const fUsd = v => '$' + usd.format(v);
+const fUsdS = v => sign(v) + '$' + usd.format(Math.abs(v));
+const fSek = v => sek.format(v) + ' kr';
+const fSekS = v => sign(v) + sek.format(Math.abs(v)) + ' kr';
+const fPct = v => sign(v) + pctF.format(Math.abs(v)) + '%';
+// percentage badge, emphasised when the move is 1% or more
+const pctTag = v => `<span class="pct ${tone(v)}${Math.abs(v) >= 1 ? ' strong' : ''}">${fPct(v)}</span>`;
+const SESSION_LABEL = { pre: 'Pre-market', regular: 'Market open', post: 'Post-market', closed: 'Close' };
+const num = s => { const v = parseFloat(String(s ?? '').replace(/,/g, '')); return isFinite(v) ? v : null; };
+// "2026-11-20T06:36:22.015-0500" -> ms (adds the colon some browsers need in the offset)
+const isoMs = s => { const v = Date.parse(String(s || '').replace(/([+-]\d\d)(\d\d)$/, '$1:$2')); return isFinite(v) && /T/.test(s) ? v : null; };
+
+async function getJson(url, ms = 10000) {
+  const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), ms);
+  try {
+    const res = await fetch(url, { signal: ctl.signal, cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return await res.json();
+  } finally { clearTimeout(timer); }
+}
+
+// ---------- Source 1: CNBC (stocks + FX, one request, includes pre/post-market) ----------
+const cnbcSym = s => s === FX ? 'SEK=' : s;
+async function quotesCnbc(symbols) {
+  const url = 'https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol?symbols=' +
+    encodeURIComponent(symbols.map(cnbcSym).join('|')) +
+    '&requestMethod=itv&noform=1&partnerId=2&fund=1&exthrs=1&output=json&_=' + Date.now();
+  const list = (await getJson(url)).FormattedQuoteResult.FormattedQuote;
+  const out = {};
+  for (const sym of symbols) {
+    const f = list.find(x => x.symbol === cnbcSym(sym));
+    if (!f || f.code !== 0 || num(f.last) == null) continue;
+    const last = num(f.last), regPrev = last - (num(f.change) || 0), ext = f.ExtendedMktQuote;
+    const q = { p: last, close: last, ref: regPrev, t: isoMs(f.last_time) || Date.now(),
+                session: f.curmktstatus === 'REG_MKT' ? 'regular' : 'closed', src: 'CNBC' };
+    if (sym === FX) q.session = 'regular';
+    else if (ext && num(ext.last) != null && f.curmktstatus !== 'REG_MKT') {
+      const pre = ext.type === 'PRE_MKT';
+      Object.assign(q, { p: num(ext.last), ref: pre ? last : regPrev, t: isoMs(ext.last_time) || q.t, session: pre ? 'pre' : 'post' });
+    }
+    out[sym] = q;
+  }
+  return out;
+}
+
+// ---------- Source 2: Webull (stocks only, one request) ----------
+async function lookupWebullIds(symbols) {
+  for (const sym of symbols.filter(s => s !== FX && !webullIds[s])) {
+    try {
+      const j = await getJson(`https://quotes-gw.webullfintech.com/api/search/pc/tickers?keyword=${encodeURIComponent(sym)}&pageIndex=1&pageSize=5&regionId=6`);
+      const hit = (j.data || []).find(d => d.symbol === sym);
+      if (hit) webullIds[sym] = hit.tickerId;
+    } catch {}
+  }
+  store.set('pf2.wbids', webullIds);
+}
+async function quotesWebull(symbols) {
+  await lookupWebullIds(symbols);
+  const ids = symbols.map(s => webullIds[s]).filter(Boolean);
+  if (!ids.length) return {};
+  const list = await getJson(`https://quotes-gw.webullfintech.com/api/bgw/quote/realtime?ids=${ids.join(',')}&includeSecu=1&delay=0&more=1&_=${Date.now()}`);
+  const out = {};
+  for (const w of list) {
+    const close = num(w.close), prev = num(w.preClose), ext = num(w.pPrice);
+    if (close == null) continue;
+    const t = isoMs(w.tradeTime) || Date.now();
+    let q;
+    if (w.status === 'T') q = { p: close, ref: prev, session: 'regular' };
+    else if (w.status === 'F') q = { p: ext ?? close, ref: close, session: ext != null ? 'pre' : 'closed' };
+    else q = { p: ext ?? close, ref: prev, session: ext != null ? 'post' : 'closed' };
+    out[w.symbol] = Object.assign(q, { close, t, src: 'Webull' });
+  }
+  return out;
+}
+
+// ---------- Source 3: Yahoo via public CORS proxy (last resort, rate-limited) ----------
+async function quotesYahoo(symbols) {
+  const ySym = s => s === FX ? 'SEK=X' : s;
+  const url = 'https://query1.finance.yahoo.com/v7/finance/spark?symbols=' + symbols.map(ySym).join(',') +
+              '&range=1d&interval=1m&includePrePost=true&_=' + Date.now();
+  const j = await getJson('https://api.cors.lol/?url=' + encodeURIComponent(url), 12000);
+  const out = {};
+  for (const sym of symbols) {
+    const item = (j.spark.result || []).find(x => x.symbol === ySym(sym));
+    const r = item && item.response && item.response[0];
+    if (!r) continue;
+    const m = r.meta, close = m.regularMarketPrice, prev = m.previousClose ?? m.chartPreviousClose;
+    const q = { p: close, close, ref: prev, t: m.regularMarketTime * 1000, session: 'closed', src: 'Yahoo' };
+    const reg = m.currentTradingPeriod && m.currentTradingPeriod.regular, now = Date.now() / 1000;
+    if (sym === FX || (reg && now >= reg.start && now < reg.end)) q.session = 'regular';
+    else {
+      const ts = r.timestamp || [], c = (r.indicators.quote[0] || {}).close || [];
+      for (let i = c.length - 1; i >= 0; i--) {
+        if (c[i] == null) continue;
+        if (ts[i] > m.regularMarketTime) {
+          const pre = (((ts[i] + m.gmtoffset) % 86400) + 86400) % 86400 < 34200;   // before 09:30 local
+          Object.assign(q, { p: c[i], t: ts[i] * 1000, session: pre ? 'pre' : 'post', ref: pre ? close : prev });
+        }
+        break;
+      }
+    }
+    out[sym] = q;
+  }
+  return out;
+}
+
+// ---------- FX backup (daily rate) ----------
+async function fxBackup() {
+  const j = await getJson('https://open.er-api.com/v6/latest/USD');
+  return j.rates && j.rates.SEK ? { [FX]: { p: j.rates.SEK, ref: j.rates.SEK, close: j.rates.SEK, t: j.time_last_update_unix * 1000, session: 'regular', src: 'exchangerate-api' } } : {};
+}
+
+// ---------- Minute bars (CNBC) for the 1 min / 10 min / 1 h / 24 h columns ----------
+const etFmt = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hourCycle: 'h23',
+  year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+const etStamp = ms => { const p = {}; for (const x of etFmt.formatToParts(new Date(ms))) p[x.type] = x.value; return `${p.year}${p.month}${p.day}${p.hour}${p.minute}${p.second}`; };
+
+async function updateBars(sym) {
+  const q = quotes[sym];
+  const have = bars[sym] || [];
+  // first load: 25 h back from the latest quote; afterwards only the newest minutes
+  const from = have.length ? have[have.length - 1][0] - 5 * 60000 : q.t - 25 * 3600000;
+  const to = Math.max(q.t, Date.now()) + 60000;
+  const j = await getJson(`https://ts-api.cnbc.com/harmony/app/bars/${encodeURIComponent(sym)}/1M/${etStamp(from)}/${etStamp(to)}/adjusted/EST5EDT.json`, 15000);
+  const map = new Map(have);
+  for (const b of (j.barData && j.barData.priceBars) || []) {
+    const c = num(b.close); if (c != null) map.set(+b.tradeTimeinMills, c);
+  }
+  const cutoff = q.t - 26 * 3600000;
+  bars[sym] = [...map].filter(b => b[0] >= cutoff).sort((a, b) => a[0] - b[0]);
+}
+
+// Price N seconds before the latest quote = close of the last 1-min bar that had ended by then.
+function basePrices(sym) {
+  const q = quotes[sym], b = bars[sym];
+  if (!b || !b.length) return [];
+  return WINDOWS.map(([, sec]) => {
+    const target = q.t - sec * 1000;
+    if (b[0][0] + 60000 > target) return null;      // not enough history
+    for (let i = b.length - 1; i >= 0; i--) if (b[i][0] + 60000 <= target) return b[i][1];
+    return null;
+  });
+}
+
+// ---------- Rendering ----------
+function render() {
+  const fx = quotes[FX].p;
+  let totUsd = 0, totChg = 0, latest = null, html = '';
+  const wNow = WINDOWS.map(() => 0), wThen = WINDOWS.map(() => 0);   // portfolio value now / then, per window
+  for (const [name, sym, n] of HOLDINGS) {
+    const q = quotes[sym];
+    if (!q) { html += `<tr><td><div class="name">${name}</div><div class="tick">${sym}</div></td><td class="num">${n}</td><td colspan="${7 + WINDOWS.length}" class="stale">No data</td></tr>`; continue; }
+    const chg = q.p - q.ref, pct = chg / q.ref * 100, val = q.p * n, dUsd = chg * n;
+    totUsd += val; totChg += dUsd;
+    if (!q.stale && (!latest || q.t > latest.t)) latest = q;
+    const base = q.stale ? [] : basePrices(sym);
+    const wCells = WINDOWS.map((_, i) => {
+      if (base[i] == null) return '<td class="num tick">–</td>';
+      wNow[i] += val; wThen[i] += base[i] * n;
+      const v = (q.p / base[i] - 1) * 100;
+      return `<td class="num ${tone(v)}">${pctTag(v)}</td>`;
+    }).join('');
+    const extra = q.session === 'post' ? `close ${fUsd(q.close)}` : `prev close ${fUsd(q.ref)}`;
+    const st = q.stale ? ' stale' : '';
+    html += `<tr>
+      <td><div class="name">${name}</div><div class="tick">${sym} · ${extra}</div></td>
+      <td class="num">${n}</td>
+      <td class="num${st}">${fUsd(q.p)}<div class="tick">${SESSION_LABEL[q.session]}${q.stale ? ' · ' + timeStr(q.t) : ''}</div></td>
+      <td class="num ${tone(chg)}">${pctTag(pct)}<div class="tick">${fUsdS(chg)}</div></td>
+      ${wCells}
+      <td class="num">${fUsd(val)}</td>
+      <td class="num">${fSek(val * fx)}</td>
+      <td class="num ${tone(dUsd)}">${fUsdS(dUsd)}</td>
+      <td class="num ${tone(dUsd)}">${fSekS(dUsd * fx)}</td>
+    </tr>`;
+  }
+  const totPct = totChg / (totUsd - totChg) * 100;
+  const wTot = WINDOWS.map((_, i) => wThen[i] ? (wNow[i] / wThen[i] - 1) * 100 : null);
+  const wTotCells = wTot.map(v => v == null ? '<td class="num tick">–</td>' : `<td class="num ${tone(v)}">${pctTag(v)}</td>`).join('');
+  $('rows').innerHTML = html;
+  $('foot').innerHTML = `<tr><td>Total</td><td></td><td></td>
+    <td class="num ${tone(totChg)}">${pctTag(totPct)}</td>${wTotCells}
+    <td class="num">${fUsd(totUsd)}</td><td class="num">${fSek(totUsd * fx)}</td>
+    <td class="num ${tone(totChg)}">${fUsdS(totChg)}</td><td class="num ${tone(totChg)}">${fSekS(totChg * fx)}</td></tr>`;
+  $('totUsd').textContent = fUsd(totUsd);
+  $('totSek').textContent = fSek(totUsd * fx);
+  $('chgUsd').textContent = fUsdS(totChg);
+  $('chgUsd').className = 'big ' + tone(totChg);
+  $('chgSek').innerHTML = `${fSekS(totChg * fx)} · ${pctTag(totPct)}`;
+  $('chgSek').className = 'small ' + tone(totChg);
+  $('trend').innerHTML = WINDOWS.map(([label], i) => `<div><div class="tick">${label}</div>` +
+    (wTot[i] == null ? '<div>–</div>' : `<div class="${tone(wTot[i])}">${pctTag(wTot[i])}</div>`) + '</div>').join('');
+  const s = latest || quotes[HOLDINGS[0][1]];
+  const fxNote = quotes[FX].stale ? ' (stale)' : '';
+  $('session').textContent = `${s.session === 'closed' ? 'Market closed' : SESSION_LABEL[s.session]} · quotes as of ${timeStr(s.t)} · USD/SEK ${fx.toFixed(4)}${fxNote}`;
+}
+
+function timeStr(t) {
+  const d = new Date(t);
+  const et = d.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', hour12: false });
+  return `${d.toLocaleString('sv-SE', { dateStyle: 'short', timeStyle: 'short' })} (${et} ET)`;
+}
+
+// ---------- Refresh loop ----------
+let busy = false;
+async function refresh() {
+  if (busy) return;
+  busy = true; $('refresh').disabled = true;
+  try { await update(); }
+  catch (e) { $('status').className = 'sub err'; $('status').textContent = 'Error: ' + e.message; }
+  finally { busy = false; $('refresh').disabled = false; }
+}
+
+async function update() {
+  $('status').className = 'sub'; $('status').textContent = 'Updating…';
+  const symbols = [FX, ...HOLDINGS.map(h => h[1])];
+  const fresh = {}, used = new Set();
+  // try each source for whatever is still missing
+  for (const source of [quotesCnbc, quotesWebull, quotesYahoo, fxBackup]) {
+    const missing = symbols.filter(s => !fresh[s]);
+    if (!missing.length) break;
+    try {
+      const got = await source(missing);
+      for (const s of missing) if (got[s]) { fresh[s] = got[s]; used.add(got[s].src); }
+    } catch (e) { console.warn(source.name, e); }
+  }
+  for (const s of symbols) {
+    if (fresh[s]) quotes[s] = Object.assign(fresh[s], { stale: false });
+    else if (quotes[s]) quotes[s].stale = true;
+  }
+  render();
+  store.set('pf2.quotes', Object.fromEntries(Object.entries(quotes).filter(([, q]) => !q.stale)
+    .concat(Object.entries(store.get('pf2.quotes') || {}).filter(([k]) => !fresh[k]))));
+
+  await Promise.all(HOLDINGS.map(h => h[1]).filter(s => fresh[s]).map(s => updateBars(s).catch(e => console.warn('bars', s, e))));
+  render();
+
+  const failed = symbols.filter(s => !fresh[s]).length;
+  const now = new Date().toLocaleTimeString('sv-SE');
+  $('status').className = failed ? 'sub err' : 'sub';
+  $('status').textContent = failed
+    ? `${failed} of ${symbols.length} quotes failed · ${now}`
+    : `Updated ${now} · ${[...used].join(' + ')}`;
+}
+
+$('refresh').addEventListener('click', refresh);
+render();
+refresh();
+setInterval(refresh, REFRESH_MS);
+</script>
+</body>
+</html>
